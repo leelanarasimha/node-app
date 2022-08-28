@@ -1,4 +1,5 @@
 const http = require('http');
+const fs = require('fs');
 
 const server = http.createServer((req, res) => {
   if (req.url === '/') {
@@ -12,9 +13,17 @@ const server = http.createServer((req, res) => {
 
 function submitUserName(req, res) {
   res.setHeader('Content-Type', 'text/html');
-  //receive request body
-  //save it in file
-  //redirect to home page
+  const body = [];
+  req.on('data', (data) => {
+    body.push(data);
+  });
+
+  req.on('end', () => {
+    console.log(body);
+    const requestBody = Buffer.concat(body).toString();
+    const userName = requestBody.split('=')[1];
+    fs.writeFileSync('username.txt', userName);
+  });
 
   res.statusCode = 302;
   res.setHeader('Location', '/');
