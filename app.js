@@ -1,56 +1,9 @@
 const http = require('http');
-const fs = require('fs');
+const routes = require('./router');
 
-const server = http.createServer((req, res) => {
-  if (req.url === '/') {
-    return setHomePage(req, res);
-  }
+const server = http.createServer(routes.routes);
+console.log(routes.text);
 
-  if (req.url === '/username' && req.method.toLowerCase() === 'post') {
-    return submitUserName(req, res);
-  }
+server.listen(3000, () => {
+  console.log('server listening at 3000 port');
 });
-
-function submitUserName(req, res) {
-  res.setHeader('Content-Type', 'text/html');
-  const body = [];
-  req.on('data', (data) => {
-    body.push(data);
-  });
-
-  req.on('end', () => {
-    console.log(body);
-    const requestBody = Buffer.concat(body).toString();
-    const userName = requestBody.split('=')[1];
-    fs.writeFileSync('username.txt', userName);
-  });
-
-  res.statusCode = 302;
-  res.setHeader('Location', '/');
-  return res.end();
-}
-
-function setHomePage(req, res) {
-  res.setHeader('Content-Type', 'text/html');
-  return res.end(`
-  <!doctype html>
-  <html>
-  <head>
-  <title>Leela Web Dev</title>
-  </head>
-  <body>
-  <form action="/username" method="post">
-  <div>
-  <label>Enter User name</label>
-    <input type="text" name="username"/>
-  </div>
-  <div>
-  <input type="submit" value="send"/>
-  </div>
-  </form>
-  </body>
-  </html>
-  `);
-}
-
-server.listen(3000);
